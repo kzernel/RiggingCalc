@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rigging Force Calculator</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>Rigging Force Calculator</h1>
+  
+  <label for="load">Load (lbs):</label>
+  <input type="number" id="load" placeholder="e.g. 1000" />
+
+  <label for="legs">Number of Legs:</label>
+  <input type="number" id="legs" placeholder="e.g. 2" />
+
+  <label for="angle">Angle (degrees):</label>
+  <input type="number" id="angle" placeholder="e.g. 45" />
+
+  <button onclick="calculateForce()">Calculate</button>
+
+  <div id="result"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
