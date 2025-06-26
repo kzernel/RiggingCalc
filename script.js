@@ -3,6 +3,7 @@ function calculateForce() {
   const legs = parseInt(document.getElementById("legs").value);
   const angleDeg = parseFloat(document.getElementById("angle").value);
   const wll = parseFloat(document.getElementById("wll").value);
+  const resultDiv = document.getElementById("result");
 
   if (!load || !legs || !angleDeg) {
     alert("Please fill in all fields with valid numbers.");
@@ -13,14 +14,18 @@ function calculateForce() {
   const force = load / (legs * Math.cos(angleRad));
   const forceRounded = force.toFixed(2);
 
-  let result = `Each leg sees approximately ${forceRounded} lbs of force.`;
+  // Build base message
+  let message = `Each leg sees approximately ${forceRounded} lbs of force.`;
 
+  // Evaluate WLL
   if (wll && force > wll) {
-    result += ` ⚠️ Warning: This exceeds the WLL of ${wll} lbs per leg!`;
-    document.getElementById("result").style.color = "red";
+    message += ` ⚠️ WARNING: This exceeds the WLL of ${wll} lbs per leg!`;
+    resultDiv.style.color = "red";
+    resultDiv.style.fontWeight = "bold";
   } else {
-    document.getElementById("result").style.color = "black";
+    resultDiv.style.color = "black";
+    resultDiv.style.fontWeight = "normal";
   }
 
-  document.getElementById("result").textContent = result;
+  resultDiv.textContent = message;
 }
