@@ -2,30 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rigging Force Calculator</title>
+  <title>Select Tower Setup</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <h1>Rigging Force Calculator</h1>
-  
-  <label for="load">Load (lbs):</label>
-  <input type="number" id="load" placeholder="e.g. 1000" />
 
-  <label for="legs">Number of Legs:</label>
-  <input type="number" id="legs" placeholder="e.g. 2" />
+  <label for="towerType">Select Tower Configuration:</label>
+  <select id="towerType" onchange="updateConfigOptions()">
+    <option value="monopole">Monopole</option>
+    <option value="self-support">Self Support Tower</option>
+    <option value="guyed">Guyed</option>
+  </select>
 
-  <label for="angle">Angle (degrees):</label>
-  <input type="number" id="angle" placeholder="e.g. 45" />
+  <label for="riggingConfig">Select Rigging Configuration:</label>
+  <select id="riggingConfig"></select>
 
-  <label for="wll">Working Load Limit (WLL per leg in lbs):</label>
-<input type="number" id="wll" placeholder="e.g. 150" />
-
-  <button onclick="calculateForce()">Calculate</button>
-
-  <div id="result">
-  <div id="forceOutput"></div>
-  <div id="warningOutput"></div>
-</div>
+  <button onclick="goToInputs()">Go</button>
 
   <script src="script.js"></script>
 </body>
