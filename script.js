@@ -1,28 +1,44 @@
-function calculateForce() {
-  const load = parseFloat(document.getElementById("load").value);
-  const legs = parseInt(document.getElementById("legs").value);
-  const angleDeg = parseFloat(document.getElementById("angle").value);
-  const wll = parseFloat(document.getElementById("wll").value);
+const riggingOptions = {
+  "monopole": [
+    "A - Top Block Only w/ Straight Tag",
+    "B - Top & Heel Blocks w/ Straight Tag",
+    "C - Top Block Only w/ Trolley System",
+    "D - Top & Heel Blocks w/ Trolley Tag"
+  ],
+  "self-support": [
+    "A - Bridle w/ Top Block",
+    "B - Bridle + Heel Block",
+    "C - Bridle + Trolley Block"
+  ],
+  "guyed": [
+    "A - Guyed Block (Static)",
+    "B - Guyed with Trolley",
+    "C - Double Block with Spreader"
+  ]
+};
 
-  const forceOutput = document.getElementById("forceOutput");
-  const warningOutput = document.getElementById("warningOutput");
-
-  if (!load || !legs || !angleDeg) {
-    alert("Please fill in all fields with valid numbers.");
-    return;
-  }
-
-  const angleRad = angleDeg * (Math.PI / 180);
-  const force = load / (legs * Math.cos(angleRad));
-  const forceRounded = force.toFixed(2);
-
-  forceOutput.textContent = `Each leg sees approximately ${forceRounded} lbs of force.`;
-
-  if (wll && force > wll) {
-    warningOutput.textContent = `⚠️ WARNING: This exceeds the WLL of ${wll} lbs per leg!`;
-    warningOutput.style.color = "red";
-    warningOutput.style.fontWeight = "bold";
-  } else {
-    warningOutput.textContent = "";
-  }
+function updateConfigOptions() {
+  const tower = document.getElementById("towerType").value;
+  const configDropdown = document.getElementById("riggingConfig");
+  configDropdown.innerHTML = "";
+  riggingOptions[tower].forEach(option => {
+    const opt = document.createElement("option");
+    opt.value = option;
+    opt.text = option;
+    configDropdown.appendChild(opt);
+  });
 }
+
+// Save selection and go to input page
+function goToInputs() {
+  const towerType = document.getElementById("towerType").value;
+  const rigConfig = document.getElementById("riggingConfig").value;
+
+  const params = new URLSearchParams();
+  params.append("tower", towerType);
+  params.append("config", rigConfig);
+
+  window.location.href = `inputs.html?${params.toString()}`;
+}
+
+window.onload = updateConfigOptions;
