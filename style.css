@@ -1,0 +1,25 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 2rem;
+}
+
+label, input {
+  display: block;
+  margin-top: 1rem;
+}
+
+input {
+  width: 200px;
+  padding: 0.5rem;
+}
+
+button {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+}
+
+#result {
+  margin-top: 2rem;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
