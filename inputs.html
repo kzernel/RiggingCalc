@@ -31,8 +31,10 @@
     <label for="hoistDistance">Hoist Distance (Dh):</label>
     <input type="number" id="hoistDistance" required> ft
 
-    <label for="tagDistance">Tag Distance (Dt):</label>
-    <input type="number" id="tagDistance"> ft
+    <div id="tagDistanceContainer" style="display:none;">
+      <label for="tagDistance">Tag Distance (Dt):</label>
+      <input type="number" id="tagDistance"> ft
+    </div>
 
     <button type="submit">Calculate</button>
   </form>
@@ -54,7 +56,7 @@
       <p><strong>Tower:</strong> ${tower}</p>
       <p><strong>Rigging Config:</strong> ${rig}</p>
       ${loadPart ? `<p><strong>Load Part:</strong> ${loadPart}</p>` : ""}
-      ${loadLoc ? `<p><strong>Load Location:</strong> ${loadLoc}</p>` : ""}
+      ${loadLoc && tower === "self-support" ? `<p><strong>Load Location:</strong> ${loadLoc}</p>` : ""}
       ${trolleyTag ? `<p><strong>Trolley Tag:</strong> ${trolleyTag}</p>` : ""}
     `;
     document.getElementById("summary").innerHTML = summary;
@@ -75,6 +77,9 @@
     }
     fileName = fileName.replace(/\s+/g, '_') + ".png";
     const imagePath = `/mnt/data/rigging_diagrams_v2/${fileName}`;
+
+    const showTagDistance = ["A", "B"].includes(rigLabel);
+    document.getElementById("tagDistanceContainer").style.display = showTagDistance ? "block" : "none";
 
     const img = document.getElementById("rigDiagram");
     img.src = imagePath;
@@ -113,3 +118,4 @@
   </script>
 </body>
 </html>
+
