@@ -2,24 +2,120 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Select Tower Setup</title>
+  <title>Rigging Setup – Page 1</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    body { font-family: Arial; margin: 2rem; }
+    label, select, input, button { display: block; margin: 1rem 0; }
+  </style>
 </head>
 <body>
-  <h1>Rigging Force Calculator</h1>
+  <h1>Rigging Force Calculator – Step 1</h1>
 
-  <label for="towerType">Select Tower Configuration:</label>
-  <select id="towerType" onchange="updateConfigOptions()">
+  <!-- Tower Type -->
+  <label for="towerType">Tower Configuration:</label>
+  <select id="towerType" onchange="updateRigConfigs()">
     <option value="monopole">Monopole</option>
-    <option value="self-support">Self Support Tower</option>
+    <option value="self-support">Self-Support</option>
     <option value="guyed">Guyed</option>
   </select>
 
-  <label for="riggingConfig">Select Rigging Configuration:</label>
-  <select id="riggingConfig"></select>
+  <!-- Rigging Configuration -->
+  <label for="rigConfig">Rigging Configuration:</label>
+  <select id="rigConfig" onchange="updateConditionalFields()"></select>
+
+  <!-- Load Part Configuration (Only Monopole or Guyed with A/B) -->
+  <div id="loadPartContainer" style="display:none;">
+    <label for="loadPart">Load Part Configuration:</label>
+    <select id="loadPart">
+      <option value="one">One Part</option>
+      <option value="two">Two Part</option>
+    </select>
+  </div>
+
+  <!-- Load Location (Only Self-Support with A/B) -->
+  <div id="loadLocationContainer" style="display:none;">
+    <label for="loadLocation">Load Location:</label>
+    <select id="loadLocation">
+      <option value="inside">Inside</option>
+      <option value="outside">Outside</option>
+    </select>
+  </div>
+
+  <!-- Trolley Tag (Only if Rig D) -->
+  <div id="trolleyTagContainer" style="display:none;">
+    <label for="trolleyTag">Trolley Tag Location:</label>
+    <select id="trolleyTag">
+      <option value="above">Above</option>
+      <option value="below">Below</option>
+    </select>
+  </div>
 
   <button onclick="goToInputs()">Go</button>
 
-  <script src="script.js"></script>
+  <script>
+    const rigConfigs = {
+      "monopole": [
+        { code: "A", text: "A - Top Block Only w/ Straight Tag" },
+        { code: "B", text: "B - Top & Heel Blocks w/ Straight Tag" },
+      ],
+      "self-support": [
+        { code: "A", text: "A - Top Block Only w/ Straight Tag" },
+        { code: "B", text: "B - Top & Heel Blocks w/ Straight Tag" },
+      ],
+      "guyed": [
+        { code: "C", text: "C - Top Block Only w/ Trolley System" },
+        { code: "D", text: "D - Top & Heel Blocks w/ Trolley Tag" }
+      ]
+    };
+
+    function updateRigConfigs() {
+      const tower = document.getElementById("towerType").value;
+      const rigSelect = document.getElementById("rigConfig");
+      rigSelect.innerHTML = "";
+      rigConfigs[tower].forEach(cfg => {
+        const opt = document.createElement("option");
+        opt.value = cfg.code;
+        opt.text = cfg.text;
+        rigSelect.appendChild(opt);
+      });
+      updateConditionalFields(); // Update conditional fields immediately
+    }
+
+    function updateConditionalFields() {
+      const tower = document.getElementById("towerType").value;
+      const rig = document.getElementById("rigConfig").value;
+
+      // Show Load Part Config only if Monopole or Guyed with A or B
+      const showLoadPart = (["monopole", "guyed"].includes(tower) && ["A", "B"].includes(rig));
+      document.getElementById("loadPartContainer").style.display = showLoadPart ? "block" : "none";
+
+      // Show Load Location only if Self-Support with A or B
+      const showLoadLoc = (tower === "self-support" && ["A", "B"].includes(rig));
+      document.getElementById("loadLocationContainer").style.display = showLoadLoc ? "block" : "none";
+
+      // Show Trolley Tag only if Rig Config D
+      const showTrolleyTag = (rig === "D");
+      document.getElementById("trolleyTagContainer").style.display = showTrolleyTag ? "block" : "none";
+    }
+
+    function goToInputs() {
+      const tower = document.getElementById("towerType").value;
+      const rig = document.getElementById("rigConfig").value;
+      const loadPart = document.getElementById("loadPart")?.value || "";
+      const loadLoc = document.getElementById("loadLocation")?.value || "";
+      const trolleyTag = document.getElementById("trolleyTag")?.value || "";
+
+      const params = new URLSearchParams({
+        tower, rig, loadPart, loadLoc, trolleyTag
+      });
+
+      window.location.href = `inputs.html?${params.toString()}`;
+    }
+
+    // Initialize on load
+    window.onload = updateRigConfigs;
+  </script>
 </body>
 </html>
+
