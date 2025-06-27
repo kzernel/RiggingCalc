@@ -52,42 +52,22 @@
     const towerLabel = tower === "self-support" ? "sst" : tower;
     const rigLabel = rig.toUpperCase();
 
-    const summary = `
+    document.getElementById("summary").innerHTML = `
       <p><strong>Tower:</strong> ${tower}</p>
       <p><strong>Rigging Config:</strong> ${rig}</p>
       ${loadPart ? `<p><strong>Load Part:</strong> ${loadPart}</p>` : ""}
-      ${loadLoc && tower === "self-support" ? `<p><strong>Load Location:</strong> ${loadLoc}</p>` : ""}
-      ${trolleyTag ? `<p><strong>Trolley Tag:</strong> ${trolleyTag}</p>` : ""}
+      ${tower === "self-support" && loadLoc ? `<p><strong>Load Location:</strong> ${loadLoc}</p>` : ""}
+      ${(rigLabel === "C" || rigLabel === "D") && trolleyTag ? `<p><strong>Trolley Tag:</strong> ${trolleyTag}</p>` : ""}
     `;
-    document.getElementById("summary").innerHTML = summary;
 
-    let fileName = `Type ${rigLabel}`;
-    if (trolleyTag) {
-      fileName += `_${trolleyTag}_${towerLabel}`;
-    } else if (loadLoc) {
-      fileName += `_${loadLoc} tower`;
-      if (loadPart) fileName += `_${loadPart}`;
-      fileName += `_${towerLabel}`;
-    } else if (loadPart) {
-      fileName += `_${loadPart}`;
-      if (loadLoc) fileName += `_${loadLoc}`;
-      fileName += `_${towerLabel}`;
-    } else {
-      fileName += `_outside_${towerLabel}`;
-    }
-    fileName = fileName.replace(/\s+/g, '_') + ".png";
-    const imagePath = `/mnt/data/rigging_diagrams_v2/${fileName}`;
-
-    const showTagDistance = ["A", "B"].includes(rigLabel);
+    const showTagDistance = rigLabel === "A" || rigLabel === "B";
     document.getElementById("tagDistanceContainer").style.display = showTagDistance ? "block" : "none";
 
+    const fileName = `Type_${rigLabel}_${towerLabel}`.replace(/\s+/g, '_') + ".png";
     const img = document.getElementById("rigDiagram");
-    img.src = imagePath;
+    img.src = `/mnt/data/rigging_diagrams_v2/${fileName}`;
     img.style.display = "block";
-    img.onerror = () => {
-      img.style.display = "none";
-      console.warn("Image not found:", fileName);
-    };
+    img.onerror = () => { img.style.display = "none"; };
 
     function calculateRigging() {
       const W = parseFloat(document.getElementById("grossLoad").value);
@@ -106,20 +86,15 @@
       const lineTension = W / (POFL * efficiency);
       const horizForce = lineTension * Math.sin(angleRadians);
 
-      const tagLineForce = (["A", "B"].includes(rigLabel) && Dt > 0 && Dl > 0)
-        ? (horizForce * Dl / Dt)
-        : 0;
-
-      const minSafeTagDistance = (tagLineForce > 200 && horizForce > 0)
-        ? (horizForce * Dl / 200)
-        : null;
+      const tagLineForce = (rigLabel === "A" || rigLabel === "B") && Dt > 0 && Dl > 0 ? (horizForce * Dl / Dt) : 0;
+      const minSafeTagDistance = tagLineForce > 200 && horizForce > 0 ? (horizForce * Dl / 200) : null;
 
       let tagLineText = "";
       if (tagLineForce > 0) {
-        tagLineText += `<p><strong>Estimated Tag Line Force:</strong> ${tagLineForce.toFixed(2)} lbs</p>`;
+        tagLineText += `<p><strong>Estimated Tag Line Force (Ft):</strong> ${tagLineForce.toFixed(2)} lbs</p>`;
         if (minSafeTagDistance) {
           tagLineText += `<p style='color:orange;'><strong>⚠️ Tag Line Force exceeds 200 lbs.</strong><br>
-          To reduce force below 200 lbs, increase tag distance to at least <strong>${minSafeTagDistance.toFixed(1)} ft</strong>.</p>`;
+          Increase tag distance to at least <strong>${minSafeTagDistance.toFixed(1)} ft</strong> to reduce force below 200 lbs.</p>`;
         }
       }
 
@@ -128,11 +103,13 @@
         <p><strong>Rigging Angle (θ):</strong> ${angleDegrees.toFixed(2)}°</p>
         <p><strong>Total Line Tension (T):</strong> ${lineTension.toFixed(2)} lbs</p>
         <p><strong>Estimated Horizontal Force (H):</strong> ${horizForce.toFixed(2)} lbs</p>
-        <p><strong>Tag Distance (Dt):</strong> ${Dt.toFixed(2)} ft — used to control load swing and prevent contact with the tower</p>
+        ${showTagDistance ? `<p><strong>Tag Distance (Dt):</strong> ${Dt.toFixed(2)} ft</p>` : ""}
         ${tagLineText}
-        <p><em>POFL = ${POFL}, Sheaves = ${sheaves}, Efficiency = ${(efficiency * 100).toFixed(2)}%</em></p>`;
+        <p><em>POFL = ${POFL}, Sheaves = ${sheaves}, Efficiency = ${(efficiency * 100).toFixed(2)}%</em></p>
+      `;
     }
   </script>
 </body>
 </html>
+
 
