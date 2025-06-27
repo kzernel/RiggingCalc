@@ -120,8 +120,8 @@
         <p><strong>Total Line Tension (T):</strong> ${lineTension.toFixed(2)} lbs</p>
         <p><strong>Estimated Horizontal Force (H):</strong> ${horizForce.toFixed(2)} lbs</p>
         <p><strong>Tag Distance (Dt):</strong> ${Dt.toFixed(2)} ft — used to control load swing and prevent contact with the tower</p>
-        ${tagLineForce > 0 ? `$1
-        ${minSafeTagDistance ? `<p style='color:orange;'><strong>⚠️ Tag Line Force exceeds 200 lbs.</strong><br>To reduce force below 200 lbs, increase tag distance to at least <strong>${minSafeTagDistance.toFixed(1)} ft</strong>.</p>` : ""}` : ""}
+        ${tagLineForce > 0 ? `<p><strong>Estimated Tag Line Force:</strong> ${tagLineForce.toFixed(2)} lbs</p>
+        ${minSafeTagDistance ? `<p style='color:orange;'><strong>⚠️ Tag Line Force exceeds 200 lbs.</strong><br>To reduce force below 200 lbs, increase tag distance to at least <strong>${minSafeTagDistance.toFixed(1)} ft</strong>.</p>` : ""}` : ""}` : ""}
         <p><em>POFL = ${POFL}, Sheaves = ${sheaves}, Efficiency = ${(efficiency * 100).toFixed(2)}%</em></p>`;
     }
   </script>
