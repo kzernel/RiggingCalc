@@ -62,8 +62,10 @@
     `;
 
     // Show Tag Distance input field immediately if needed
-    const showTag = ["A", "B"].includes(rig);
-    document.getElementById("tagDistanceContainer").style.display = showTag ? "block" : "none";
+    window.onload = function() {
+      const showTag = ["A", "B"].includes(rig);
+      document.getElementById("tagDistanceContainer").style.display = showTag ? "block" : "none";
+    };
     
 
     // Load rig diagram
@@ -95,7 +97,7 @@
       document.getElementById("tagDistanceContainer").style.display = showTag ? "block" : "none";
 
       const AtRad = Dt > 0 && Hl > 0 ? Math.atan(Hl / Dt) : 0;
-      const tagForce = (showTag && Dt > 0 && Hl > 0) ? tension * Math.sin(AtRad) : 0;
+      const tagForce = (showTag && Dt > 0 && Hl > 0) ? horiz / Math.tan(AtRad) : 0;
       const safeDt = (tagForce > 200) ? (horiz * Dl / 200) : null;
 
       // Output
@@ -115,6 +117,7 @@
   </script>
 </body>
 </html>
+
 
 
 
