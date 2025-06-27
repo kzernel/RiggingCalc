@@ -97,7 +97,8 @@
       document.getElementById("tagDistanceContainer").style.display = showTag ? "block" : "none";
 
       const AtRad = Dt > 0 && Htb > 0 ? Math.atan(Htb / Dt) : 0;
-      const tagForce = (showTag && Dt > 0 && Hl > 0) ? horiz / Math.tan(AtRad) : 0;
+      const AhRad = Dh > 0 && Htb > 0 ? Math.atan(Htb / Dh) : 0;
+      const tagForce = (showTag && Dt > 0 && Dh > 0 && Htb > 0) ? tension * Math.sin(AhRad) / Math.sin(AtRad) : 0;
       const safeDt = (tagForce > 200) ? (horiz * Dl / 200) : null;
 
       // Output
@@ -117,6 +118,7 @@
   </script>
 </body>
 </html>
+
 
 
 
