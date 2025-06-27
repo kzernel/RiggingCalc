@@ -90,13 +90,13 @@
 
       const angleRad = Math.atan(Htb / Dh);
       const angleDeg = angleRad * (180 / Math.PI);
-      const tension = W / (POFL * efficiency);
+      const tension = W / efficiency;
       const horiz = tension * Math.sin(angleRad);
 
       const showTag = ["A", "B"].includes(rig);
       document.getElementById("tagDistanceContainer").style.display = showTag ? "block" : "none";
 
-      const AtRad = Dt > 0 && Hl > 0 ? Math.atan(Hl / Dt) : 0;
+      const AtRad = Dt > 0 && Htb > 0 ? Math.atan(Htb / Dt) : 0;
       const tagForce = (showTag && Dt > 0 && Hl > 0) ? horiz / Math.tan(AtRad) : 0;
       const safeDt = (tagForce > 200) ? (horiz * Dl / 200) : null;
 
@@ -117,7 +117,6 @@
   </script>
 </body>
 </html>
-
 
 
 
