@@ -1,20 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Rigging Inputs</title>
+  <meta charset="UTF-8">
+  <title>Rigging Inputs – Page 2</title>
+  <style>
+    body { font-family: Arial; margin: 2rem; }
+    label, input, button { display: block; margin: 1rem 0; }
+    img { max-width: 600px; margin-top: 2rem; border: 1px solid #ccc; }
+  </style>
 </head>
 <body>
-  <h1>Enter Rigging Load Inputs</h1>
-  <p id="summary"></p>
+  <h1>Enter Rigging Inputs</h1>
+
+  <div id="summary"></div>
+  <img id="rigDiagram" src="" alt="Rigging Diagram" style="display:none;">
+
+  <form onsubmit="event.preventDefault(); calculateRigging();">
+    <label for="grossLoad">Gross Load (lbs):</label>
+    <input type="number" id="grossLoad" required>
+
+    <label for="hoistDistance">Hoist Distance (ft):</label>
+    <input type="number" id="hoistDistance" required>
+
+    <label for="blockHeight">Top Block Height (ft):</label>
+    <input type="number" id="blockHeight" required>
+
+    <label for="poLine">Parts of Line:</label>
+    <input type="number" id="poLine" value="1" min="1" required>
+
+    <label for="sheaves">Total Sheaves:</label>
+    <input type="number" id="sheaves" value="1" min="0" required>
+
+    <button type="submit">Calculate</button>
+  </form>
+
+  <div id="results"></div>
 
   <script>
     const params = new URLSearchParams(window.location.search);
-    const tower = params.get("tower");
-    const config = params.get("config");
+    const tower = params.get("tower") || "";
+    const rig = params.get("rig") || "";
+    const loadPart = params.get("loadPart") || "";
+    const loadLoc = params.get("loadLoc") || "";
+    const trolleyTag = params.get("trolleyTag") || "";
 
-    document.getElementById("summary").textContent = 
-      `Tower: ${tower}, Configuration: ${config}`;
+    const towerLabel = tower === "self-support" ? "sst" : tower;
+    const rigLabel = rig.toUpperCase();
+
+    const summary = `
+      <p><strong>Tower:</strong> ${tower}</p>
+      <p><strong>Rigging Config:</strong> ${rig}</p>
+      ${loadPart ? `<p><strong>Load Part:</strong> ${loadPart}</p>` : ""}
+      ${loadLoc ? `<p><strong>Load Location:</strong> ${loadLoc}</p>` : ""}
+      ${trolleyTag ? `<p><strong>Trolley Tag:</strong> ${trolleyTag}</p>` : ""}
+    `;
+    document.getElementById("summary").innerHTML = summary;
+
+    // Diagram filename generator
+    let fileName = `Type ${rigLabel}`;
+    if (trolleyTag) {
+      fileName += `_${trolleyTag}_${towerLabel}`;
+    } else if (loadLoc) {
+      fileName += `_${loadLoc} tower`;
+      if (loadPart) fileName += `_${loadPart}`;
+      fileName += `_${towerLabel}`;
+    } else if (loadPart) {
+      fileName += `_${loadPart}`;
+      if (loadLoc) fileName += `_${loadLoc}`;
+      fileName += `_${towerLabel}`;
+    } else {
+      fileName += `_outside_${towerLabel}`;
+    }
+    fileName = fileName.replace(/\s+/g, '_') + ".png";
+    const imagePath = `/mnt/data/rigging_diagrams_v2/${fileName}`;
+
+    const img = document.getElementById("rigDiagram");
+    img.src = imagePath;
+    img.style.display = "block";
+    img.onerror = () => {
+      img.style.display = "none";
+      console.warn("Image not found:", fileName);
+    };
+
+    function calculateRigging() {
+      const load = parseFloat(document.getElementById("grossLoad").value);
+      const hoist = parseFloat(document.getElementById("hoistDistance").value);
+      const height = parseFloat(document.getElementById("blockHeight").value);
+      const poLine = parseInt(document.getElementById("poLine").value);
+      const sheaves = parseInt(document.getElementById("sheaves").value);
+
+      const angle = Math.atan(height / hoist) * (180 / Math.PI);
+      const efficiency = Math.pow(0.97, sheaves); // 3% loss per sheave
+      const tension = load / (poLine * efficiency);
+      const horizForce = tension * Math.sin(Math.atan(height / hoist));
+
+      document.getElementById("results").innerHTML = `
+        <h3>Calculated Forces</h3>
+        <p><strong>Rigging Angle:</strong> ${angle.toFixed(2)}°</p>
+        <p><strong>Total Line Tension:</strong> ${tension.toFixed(2)} lbs</p>
+        <p><strong>Estimated Horizontal Force:</strong> ${horizForce.toFixed(2)} lbs</p>
+        <p><em>Efficiency based on ${sheaves} sheaves @ 3% loss each.</em></p>
+      `;
+    }
   </script>
 </body>
 </html>
