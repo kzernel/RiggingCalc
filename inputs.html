@@ -106,9 +106,13 @@
       const lineTension = W / (POFL * efficiency);
       const horizForce = lineTension * Math.sin(angleRadians);
 
-      const tagLineForce = (["A", "B"].includes(rigLabel) && Dt > 0)
-        ? (lineTension * (Dt / Dl))
+      const tagLineForce = (["A", "B"].includes(rigLabel) && Dt > 0 && Dl > 0)
+        ? (horizForce * Dl / Dt)
         : 0;
+
+      const minSafeTagDistance = (tagLineForce > 200 && horizForce > 0)
+        ? (horizForce * Dl / 200)
+        : null;
 
       document.getElementById("results").innerHTML = `
         <h3>Calculated Forces</h3>
@@ -116,10 +120,12 @@
         <p><strong>Total Line Tension (T):</strong> ${lineTension.toFixed(2)} lbs</p>
         <p><strong>Estimated Horizontal Force (H):</strong> ${horizForce.toFixed(2)} lbs</p>
         <p><strong>Tag Distance (Dt):</strong> ${Dt.toFixed(2)} ft — used to control load swing and prevent contact with the tower</p>
-        ${tagLineForce > 0 ? `<p><strong>Estimated Tag Line Force:</strong> ${tagLineForce.toFixed(2)} lbs</p>` : ""}
+        ${tagLineForce > 0 ? `$1
+        ${minSafeTagDistance ? `<p style='color:orange;'><strong>⚠️ Tag Line Force exceeds 200 lbs.</strong><br>To reduce force below 200 lbs, increase tag distance to at least <strong>${minSafeTagDistance.toFixed(1)} ft</strong>.</p>` : ""}` : ""}
         <p><em>POFL = ${POFL}, Sheaves = ${sheaves}, Efficiency = ${(efficiency * 100).toFixed(2)}%</em></p>`;
     }
   </script>
 </body>
 </html>
+
 
