@@ -12,7 +12,10 @@
 <body>
   <h1>Lift Inputs</h1>
 
-  <div id="summary"></div>
+  <fieldset style="border: 1px solid #999; padding: 1rem; margin-bottom: 2rem;">
+    <legend><strong>Rigging Setup Summary</strong></legend>
+    <div id="summary"></div>
+</fieldset>
   <img id="rigDiagram" src="" alt="Rigging Diagram" style="display:none;">
 
   <form onsubmit="event.preventDefault(); calculateRigging();">
@@ -44,72 +47,71 @@
   <script>
     const params = new URLSearchParams(window.location.search);
     const tower = params.get("tower") || "";
-    const rig = params.get("rig") || "";
-    const loadPart = params.get("loadPart") || "";
+    const rig = (params.get("rig") || "").toUpperCase();
+    const loadPart = (params.get("loadPart") || "").toLowerCase();
     const loadLoc = params.get("loadLoc") || "";
     const trolleyTag = params.get("trolleyTag") || "";
 
-    const towerLabel = tower === "self-support" ? "sst" : tower;
-    const rigLabel = rig.toUpperCase();
-
+    // Summary block
     document.getElementById("summary").innerHTML = `
       <p><strong>Tower:</strong> ${tower}</p>
       <p><strong>Rigging Config:</strong> ${rig}</p>
       ${loadPart ? `<p><strong>Load Part:</strong> ${loadPart}</p>` : ""}
-      ${tower === "self-support" && loadLoc ? `<p><strong>Load Location:</strong> ${loadLoc}</p>` : ""}
-      ${(rigLabel === "C" || rigLabel === "D") && trolleyTag ? `<p><strong>Trolley Tag:</strong> ${trolleyTag}</p>` : ""}
+      ${(tower === "self-support" && loadLoc) ? `<p><strong>Load Location:</strong> ${loadLoc}</p>` : ""}
+      ${(["C", "D"].includes(rig) && trolleyTag) ? `<p><strong>Trolley Tag:</strong> ${trolleyTag}</p>` : ""}
     `;
 
-    const showTagDistance = rigLabel === "A" || rigLabel === "B";
-    document.getElementById("tagDistanceContainer").style.display = showTagDistance ? "block" : "none";
+    // Show Tag Distance input field immediately if needed
+    
 
-    const fileName = `Type_${rigLabel}_${towerLabel}`.replace(/\s+/g, '_') + ".png";
+    // Load rig diagram
     const img = document.getElementById("rigDiagram");
-    img.src = `/mnt/data/rigging_diagrams_v2/${fileName}`;
-    img.style.display = "block";
-    img.onerror = () => { img.style.display = "none"; };
+    const diagramFile = `Type_${rig}_${tower === "self-support" ? "sst" : tower}`.replace(/\s+/g, '_') + ".png";
+    img.src = `/mnt/data/rigging_diagrams_v2/${diagramFile}`;
+    img.onerror = () => img.style.display = "none";
 
+    // Calculation logic
     function calculateRigging() {
       const W = parseFloat(document.getElementById("grossLoad").value);
       const Hl = parseFloat(document.getElementById("blockHeight").value);
       const Dl = parseFloat(document.getElementById("loadDistance").value);
       const Htb = parseFloat(document.getElementById("topBlockHeight").value);
       const Dh = parseFloat(document.getElementById("hoistDistance").value);
-      const Dt = parseFloat(document.getElementById("tagDistance").value) || 0;
+      const DtField = document.getElementById("tagDistance");
+      const Dt = DtField && DtField.value ? parseFloat(DtField.value) : 0;
 
       const POFL = loadPart === "two" ? 2 : 1;
-      const sheaves = ["B", "D"].includes(rigLabel) ? 2 : 1;
+      const sheaves = ["B", "D"].includes(rig) ? 2 : 1;
       const efficiency = Math.pow(0.97, sheaves);
 
-      const angleRadians = Math.atan(Htb / Dh);
-      const angleDegrees = angleRadians * (180 / Math.PI);
-      const lineTension = W / (POFL * efficiency);
-      const horizForce = lineTension * Math.sin(angleRadians);
+      const angleRad = Math.atan(Htb / Dh);
+      const angleDeg = angleRad * (180 / Math.PI);
+      const tension = W / (POFL * efficiency);
+      const horiz = tension * Math.sin(angleRad);
 
-      const tagLineForce = (rigLabel === "A" || rigLabel === "B") && Dt > 0 && Dl > 0 ? (horizForce * Dl / Dt) : 0;
-      const minSafeTagDistance = tagLineForce > 200 && horizForce > 0 ? (horizForce * Dl / 200) : null;
+      const showTag = ["A", "B"].includes(rig);
+      document.getElementById("tagDistanceContainer").style.display = showTag ? "block" : "none";
 
-      let tagLineText = "";
-      if (tagLineForce > 0) {
-        tagLineText += `<p><strong>Estimated Tag Line Force (Ft):</strong> ${tagLineForce.toFixed(2)} lbs</p>`;
-        if (minSafeTagDistance) {
-          tagLineText += `<p style='color:orange;'><strong>⚠️ Tag Line Force exceeds 200 lbs.</strong><br>
-          Increase tag distance to at least <strong>${minSafeTagDistance.toFixed(1)} ft</strong> to reduce force below 200 lbs.</p>`;
-        }
-      }
+      const tagForce = (showTag && Dt > 0 && Dl > 0) ? (horiz * Dl / Dt) : 0;
+      const safeDt = (tagForce > 200) ? (horiz * Dl / 200) : null;
 
-      document.getElementById("results").innerHTML = `
+      // Output
+      const results = document.getElementById("results");
+      results.innerHTML = `
         <h3>Calculated Forces</h3>
-        <p><strong>Rigging Angle (θ):</strong> ${angleDegrees.toFixed(2)}°</p>
-        <p><strong>Total Line Tension (T):</strong> ${lineTension.toFixed(2)} lbs</p>
-        <p><strong>Estimated Horizontal Force (H):</strong> ${horizForce.toFixed(2)} lbs</p>
-        ${showTagDistance ? `<p><strong>Tag Distance (Dt):</strong> ${Dt.toFixed(2)} ft</p>` : ""}
-        ${tagLineText}
+        <p><strong>Rigging Angle (θ):</strong> ${angleDeg.toFixed(2)}°</p>
+        <p><strong>Total Line Tension (T):</strong> ${tension.toFixed(2)} lbs</p>
+        <p><strong>Estimated Horizontal Force (H):</strong> ${horiz.toFixed(2)} lbs</p>
+        ${showTag && Dt ? `<p><strong>Tag Distance (Dt):</strong> ${Dt.toFixed(2)} ft</p>` : ""}
+        ${tagForce > 0 ? `<p><strong>Estimated Tag Line Force (Ft):</strong> ${tagForce.toFixed(2)} lbs</p>` : ""}
+        ${safeDt ? `<p style='color:orange;'><strong>⚠️ Tag Line Force exceeds 200 lbs.</strong><br>
+        Increase tag distance to at least <strong>${safeDt.toFixed(1)} ft</strong>.</p>` : ""}
         <p><em>POFL = ${POFL}, Sheaves = ${sheaves}, Efficiency = ${(efficiency * 100).toFixed(2)}%</em></p>
       `;
     }
   </script>
 </body>
 </html>
+
 
 
