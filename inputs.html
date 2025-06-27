@@ -10,20 +10,29 @@
   </style>
 </head>
 <body>
-  <h1>Enter Rigging Inputs</h1>
+  <h1>Lift Inputs</h1>
 
   <div id="summary"></div>
   <img id="rigDiagram" src="" alt="Rigging Diagram" style="display:none;">
 
   <form onsubmit="event.preventDefault(); calculateRigging();">
-    <label for="grossLoad">Gross Load (lbs):</label>
-    <input type="number" id="grossLoad" required>
+    <label for="grossLoad">Gross Load (W):</label>
+    <input type="number" id="grossLoad" required> lbs
 
-    <label for="hoistDistance">Hoist Distance (ft):</label>
-    <input type="number" id="hoistDistance" required>
+    <label for="blockHeight">Load Height (Hl):</label>
+    <input type="number" id="blockHeight" required> ft
 
-    <label for="blockHeight">Top Block Height (ft):</label>
-    <input type="number" id="blockHeight" required>
+    <label for="loadDistance">Load Distance (Dl):</label>
+    <input type="number" id="loadDistance" required> ft
+
+    <label for="topBlockHeight">Top Block Height (Htb):</label>
+    <input type="number" id="topBlockHeight" required> ft
+
+    <label for="hoistDistance">Hoist Distance (Dh):</label>
+    <input type="number" id="hoistDistance" required> ft
+
+    <label for="tagDistance">Tag Distance (Dt):</label>
+    <input type="number" id="tagDistance"> ft
 
     <label for="poLine">Parts of Line:</label>
     <input type="number" id="poLine" value="1" min="1" required>
@@ -56,7 +65,6 @@
     `;
     document.getElementById("summary").innerHTML = summary;
 
-    // Diagram filename generator
     let fileName = `Type ${rigLabel}`;
     if (trolleyTag) {
       fileName += `_${trolleyTag}_${towerLabel}`;
@@ -83,22 +91,27 @@
     };
 
     function calculateRigging() {
-      const load = parseFloat(document.getElementById("grossLoad").value);
-      const hoist = parseFloat(document.getElementById("hoistDistance").value);
-      const height = parseFloat(document.getElementById("blockHeight").value);
-      const poLine = parseInt(document.getElementById("poLine").value);
+      const W = parseFloat(document.getElementById("grossLoad").value);
+      const Hl = parseFloat(document.getElementById("blockHeight").value);
+      const Dl = parseFloat(document.getElementById("loadDistance").value);
+      const Htb = parseFloat(document.getElementById("topBlockHeight").value);
+      const Dh = parseFloat(document.getElementById("hoistDistance").value);
+      const Dt = parseFloat(document.getElementById("tagDistance").value) || 0;
+      const POFL = parseInt(document.getElementById("poLine").value);
       const sheaves = parseInt(document.getElementById("sheaves").value);
 
-      const angle = Math.atan(height / hoist) * (180 / Math.PI);
-      const efficiency = Math.pow(0.97, sheaves); // 3% loss per sheave
-      const tension = load / (poLine * efficiency);
-      const horizForce = tension * Math.sin(Math.atan(height / hoist));
+      const angleRadians = Math.atan(Htb / Dh);
+      const angleDegrees = angleRadians * (180 / Math.PI);
+      const efficiency = Math.pow(0.97, sheaves);
+      const lineTension = W / (POFL * efficiency);
+      const horizForce = lineTension * Math.sin(angleRadians);
 
       document.getElementById("results").innerHTML = `
         <h3>Calculated Forces</h3>
-        <p><strong>Rigging Angle:</strong> ${angle.toFixed(2)}°</p>
-        <p><strong>Total Line Tension:</strong> ${tension.toFixed(2)} lbs</p>
-        <p><strong>Estimated Horizontal Force:</strong> ${horizForce.toFixed(2)} lbs</p>
+        <p><strong>Rigging Angle (θ):</strong> ${angleDegrees.toFixed(2)}°</p>
+        <p><strong>Total Line Tension (T):</strong> ${lineTension.toFixed(2)} lbs</p>
+        <p><strong>Estimated Horizontal Force (H):</strong> ${horizForce.toFixed(2)} lbs</p>
+        <p><strong>Tag Distance (Dt):</strong> ${Dt.toFixed(2)} ft (for visual only, not yet in calc)</p>
         <p><em>Efficiency based on ${sheaves} sheaves @ 3% loss each.</em></p>
       `;
     }
