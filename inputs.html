@@ -34,12 +34,6 @@
     <label for="tagDistance">Tag Distance (Dt):</label>
     <input type="number" id="tagDistance"> ft
 
-    <label for="poLine">Parts of Line:</label>
-    <input type="number" id="poLine" value="1" min="1" required>
-
-    <label for="sheaves">Total Sheaves:</label>
-    <input type="number" id="sheaves" value="1" min="0" required>
-
     <button type="submit">Calculate</button>
   </form>
 
@@ -97,12 +91,13 @@
       const Htb = parseFloat(document.getElementById("topBlockHeight").value);
       const Dh = parseFloat(document.getElementById("hoistDistance").value);
       const Dt = parseFloat(document.getElementById("tagDistance").value) || 0;
-      const POFL = parseInt(document.getElementById("poLine").value);
-      const sheaves = parseInt(document.getElementById("sheaves").value);
+
+      const POFL = loadPart === "two" ? 2 : 1;
+      const sheaves = ["B", "D"].includes(rigLabel) ? 2 : 1;
+      const efficiency = Math.pow(0.97, sheaves);
 
       const angleRadians = Math.atan(Htb / Dh);
       const angleDegrees = angleRadians * (180 / Math.PI);
-      const efficiency = Math.pow(0.97, sheaves);
       const lineTension = W / (POFL * efficiency);
       const horizForce = lineTension * Math.sin(angleRadians);
 
@@ -111,8 +106,8 @@
         <p><strong>Rigging Angle (θ):</strong> ${angleDegrees.toFixed(2)}°</p>
         <p><strong>Total Line Tension (T):</strong> ${lineTension.toFixed(2)} lbs</p>
         <p><strong>Estimated Horizontal Force (H):</strong> ${horizForce.toFixed(2)} lbs</p>
-        <p><strong>Tag Distance (Dt):</strong> ${Dt.toFixed(2)} ft (for visual only, not yet in calc)</p>
-        <p><em>Efficiency based on ${sheaves} sheaves @ 3% loss each.</em></p>
+        <p><strong>Tag Distance (Dt):</strong> ${Dt.toFixed(2)} ft (for visual only)</p>
+        <p><em>POFL = ${POFL}, Sheaves = ${sheaves}, Efficiency = ${(efficiency * 100).toFixed(2)}%</em></p>
       `;
     }
   </script>
