@@ -106,14 +106,18 @@
       const lineTension = W / (POFL * efficiency);
       const horizForce = lineTension * Math.sin(angleRadians);
 
+      const tagLineForce = (["A", "B"].includes(rigLabel) && Dt > 0)
+        ? (lineTension * (Dt / Dl))
+        : 0;
+
       document.getElementById("results").innerHTML = `
         <h3>Calculated Forces</h3>
         <p><strong>Rigging Angle (θ):</strong> ${angleDegrees.toFixed(2)}°</p>
         <p><strong>Total Line Tension (T):</strong> ${lineTension.toFixed(2)} lbs</p>
         <p><strong>Estimated Horizontal Force (H):</strong> ${horizForce.toFixed(2)} lbs</p>
-        <p><strong>Tag Distance (Dt):</strong> ${Dt.toFixed(2)} ft (for visual only)</p>
-        <p><em>POFL = ${POFL}, Sheaves = ${sheaves}, Efficiency = ${(efficiency * 100).toFixed(2)}%</em></p>
-      `;
+        <p><strong>Tag Distance (Dt):</strong> ${Dt.toFixed(2)} ft — used to control load swing and prevent contact with the tower</p>
+        ${tagLineForce > 0 ? `<p><strong>Estimated Tag Line Force:</strong> ${tagLineForce.toFixed(2)} lbs</p>` : ""}
+        <p><em>POFL = ${POFL}, Sheaves = ${sheaves}, Efficiency = ${(efficiency * 100).toFixed(2)}%</em></p>`;
     }
   </script>
 </body>
