@@ -123,15 +123,6 @@
         }
       }
 
-      let tagLineText = "";
-      if (tagLineForce > 0) {
-        tagLineText += `<p><strong>Estimated Tag Line Force:</strong> ${tagLineForce.toFixed(2)} lbs</p>`;
-        if (minSafeTagDistance) {
-          tagLineText += `<p style='color:orange;'><strong>⚠️ Tag Line Force exceeds 200 lbs.</strong><br>
-          To reduce force below 200 lbs, increase tag distance to at least <strong>${minSafeTagDistance.toFixed(1)} ft</strong>.</p>`;
-        }
-      }
-
       document.getElementById("results").innerHTML = `
         <h3>Calculated Forces</h3>
         <p><strong>Rigging Angle (θ):</strong> ${angleDegrees.toFixed(2)}°</p>
@@ -146,3 +137,4 @@
   </script>
 </body>
 </html>
+
