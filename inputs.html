@@ -62,6 +62,8 @@
     `;
 
     // Show Tag Distance input field immediately if needed
+    const showTag = ["A", "B"].includes(rig);
+    document.getElementById("tagDistanceContainer").style.display = showTag ? "block" : "none";
     
 
     // Load rig diagram
